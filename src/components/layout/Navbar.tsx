@@ -1,4 +1,5 @@
-import { Menu, LogOut } from "lucide-react";
+import { Menu, LogOut, ArrowRightLeft } from "lucide-react";
+import { Link, useLocation } from "react-router-dom";
 import { Avatar } from "@/components/ui/Avatar";
 import { Button } from "@/components/ui/Button";
 import { useAuth } from "@/hooks/useAuth";
@@ -11,14 +12,16 @@ export interface NavbarProps {
 
 export function Navbar({ onOpenMobile, onMenuToggle, portalName = "HR / Admin Portal" }: NavbarProps) {
   const { user, profile, employee, signOut } = useAuth();
+  const location = useLocation();
   const toggleHandler = onMenuToggle || onOpenMobile;
 
-  const displayName = employee?.full_name || profile?.email || user?.email || "Admin User";
-  const displayRole = profile?.role === "admin" ? "Administrator" : "Employee";
-  const displayEmail = user?.email || profile?.email || "";
+  const isAdminView = location.pathname.startsWith("/admin");
+  const displayName = employee?.full_name || profile?.email || user?.email || (isAdminView ? "Priya Sharma" : "Arjun Sheddi");
+  const displayRole = isAdminView ? "Administrator" : "Staff Employee";
+  const displayEmail = user?.email || profile?.email || (isAdminView ? "priya.sharma@dayflow.io" : "arjun.reddy@dayflow.io");
 
   return (
-    <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b border-border bg-surface/95 px-4 backdrop-blur md:px-6">
+    <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b border-border bg-surface/95 px-4 backdrop-blur md:px-6 select-none">
       <div className="flex items-center gap-3">
         <button
           type="button"
@@ -31,9 +34,28 @@ export function Navbar({ onOpenMobile, onMenuToggle, portalName = "HR / Admin Po
         <h1 className="hidden text-lg font-semibold text-text-primary md:block">{portalName}</h1>
       </div>
 
-      <div className="flex items-center gap-4">
-        <div className="flex items-center gap-3">
-          <div className="hidden text-right sm:block">
+      <div className="flex items-center gap-3 sm:gap-4">
+        {/* Quick Portal Switcher */}
+        {isAdminView ? (
+          <Link
+            to="/employee/dashboard"
+            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-primary-700 bg-primary-50 hover:bg-primary-100/80 rounded-lg border border-primary-200 transition-colors"
+          >
+            <ArrowRightLeft className="h-3.5 w-3.5" />
+            <span className="hidden sm:inline">Switch to</span> Employee Portal
+          </Link>
+        ) : (
+          <Link
+            to="/admin/dashboard"
+            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-primary-700 bg-primary-50 hover:bg-primary-100/80 rounded-lg border border-primary-200 transition-colors"
+          >
+            <ArrowRightLeft className="h-3.5 w-3.5" />
+            <span className="hidden sm:inline">Switch to</span> Admin Portal
+          </Link>
+        )}
+
+        <div className="flex items-center gap-2.5">
+          <div className="hidden text-right md:block">
             <p className="text-sm font-medium text-text-primary">{displayName}</p>
             <p className="text-xs text-text-muted">{displayRole} {displayEmail ? `· ${displayEmail}` : ""}</p>
           </div>
@@ -48,7 +70,7 @@ export function Navbar({ onOpenMobile, onMenuToggle, portalName = "HR / Admin Po
           aria-label="Sign out"
           className="text-xs"
         >
-          Sign Out
+          <span className="hidden sm:inline">Sign Out</span>
         </Button>
       </div>
     </header>
