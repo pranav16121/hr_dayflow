@@ -37,7 +37,7 @@ export function AdminEmployeesPage() {
   }, [employees, search, department, status]);
 
   if (loading) return <LoadingState label="Loading employees…" />;
-  if (error) return <ErrorState onRetry={refetch} />;
+  if (error) return <ErrorState onRetry={refetch} description={error.message} />;
 
   return (
     <div className="space-y-6">

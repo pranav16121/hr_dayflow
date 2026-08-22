@@ -64,7 +64,7 @@ export function AdminEmployeeDetailPage() {
   }
 
   if (loading) return <LoadingState label="Loading employee…" />;
-  if (error) return <ErrorState onRetry={refetch} />;
+  if (error) return <ErrorState onRetry={refetch} description={error.message} />;
   if (!employee) return <EmptyState title="Employee not found" />;
 
   return (

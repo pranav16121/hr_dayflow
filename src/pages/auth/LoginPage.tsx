@@ -1,0 +1,149 @@
+import { useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import { LogIn, AlertCircle, Sparkles } from "lucide-react";
+import { useAuth } from "@/hooks/useAuth";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/Card";
+import { Input } from "@/components/ui/Input";
+import { Button } from "@/components/ui/Button";
+
+const loginSchema = z.object({
+  email: z.string().min(1, "Email is required").email("Enter a valid email"),
+  password: z.string().min(1, "Password is required"),
+});
+
+type LoginFormValues = z.infer<typeof loginSchema>;
+
+export function LoginPage() {
+  const { signIn, user, isAdmin, loading } = useAuth();
+  const navigate = useNavigate();
+  const location = useLocation();
+  const [authError, setAuthError] = useState<string | null>(null);
+
+  const from = (location.state as { from?: { pathname?: string } })?.from?.pathname || "/admin/dashboard";
+
+  const {
+    register,
+    handleSubmit,
+    setValue,
+    formState: { errors, isSubmitting },
+  } = useForm<LoginFormValues>({
+    resolver: zodResolver(loginSchema),
+    defaultValues: {
+      email: "",
+      password: "",
+    },
+  });
+
+  // If already logged in and admin, redirect
+  if (!loading && user && isAdmin) {
+    navigate(from, { replace: true });
+  }
+
+  const onSubmit = handleSubmit(async (values) => {
+    setAuthError(null);
+    try {
+      const res = await signIn(values.email, values.password);
+      if (res.error) {
+        setAuthError(res.error);
+        return;
+      }
+      navigate(from, { replace: true });
+    } catch (err) {
+      setAuthError(err instanceof Error ? err.message : "Failed to sign in to Supabase");
+    }
+  });
+
+  const handleFillDemoAdmin = () => {
+    setValue("email", "priya.sharma@dayflow.io");
+    setValue("password", "admin123");
+    setAuthError(null);
+  };
+
+  return (
+    <div className="flex min-h-screen flex-col justify-center bg-background px-4 py-12 sm:px-6 lg:px-8">
+      <div className="sm:mx-auto sm:w-full sm:max-w-md">
+        <div className="text-center">
+          <h1 className="text-3xl font-extrabold tracking-tight text-text-primary">
+            Dayflow <span className="text-primary">HRMS</span>
+          </h1>
+          <p className="mt-2 text-sm text-text-secondary">
+            Sign in to your account to access the Admin Portal
+          </p>
+        </div>
+
+        <Card className="mt-8 shadow-modal">
+          <CardHeader className="flex-col items-start gap-1">
+            <CardTitle>Admin Sign In</CardTitle>
+            <CardDescription>
+              Enter your Supabase credentials to access database operations.
+            </CardDescription>
+          </CardHeader>
+
+          <CardContent>
+            {authError && (
+              <div
+                role="alert"
+                className="mb-4 flex items-start gap-2.5 rounded-card border border-danger-700/20 bg-danger-50 p-3 text-sm text-danger-700"
+              >
+                <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
+                <div>
+                  <p className="font-medium">Authentication Failed</p>
+                  <p className="mt-0.5 text-xs text-danger-700/90">{authError}</p>
+                </div>
+              </div>
+            )}
+
+            <form onSubmit={onSubmit} className="space-y-4">
+              <Input
+                label="Email address"
+                type="email"
+                placeholder="admin@dayflow.io"
+                autoComplete="email"
+                {...register("email")}
+                error={errors.email?.message}
+              />
+
+              <Input
+                label="Password"
+                type="password"
+                placeholder="••••••••"
+                autoComplete="current-password"
+                {...register("password")}
+                error={errors.password?.message}
+              />
+
+              <Button
+                type="submit"
+                className="w-full justify-center"
+                loading={isSubmitting}
+                icon={<LogIn className="h-4 w-4" />}
+              >
+                Sign In
+              </Button>
+            </form>
+
+            <div className="mt-6 border-t border-border pt-4">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-medium text-text-muted">Development Demo Account:</span>
+                <button
+                  type="button"
+                  onClick={handleFillDemoAdmin}
+                  className="inline-flex items-center gap-1 text-xs font-semibold text-primary hover:underline"
+                >
+                  <Sparkles className="h-3 w-3" /> Fill Demo Admin
+                </button>
+              </div>
+              <p className="mt-1 text-[11px] text-text-muted">
+                Admin: <code className="bg-zinc-100 px-1 py-0.5 rounded text-text-secondary">priya.sharma@dayflow.io</code> / <code className="bg-zinc-100 px-1 py-0.5 rounded text-text-secondary">admin123</code>
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    </div>
+  );
+}
+
