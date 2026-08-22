@@ -1,34 +1,64 @@
-import React from 'react';
-import { PageHeader } from '../../components/ui/PageHeader';
-import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/Card';
+import { useMemo, useState } from "react";
+import { getEmployees } from "@/services/employeeService";
+import { getAllAttendance } from "@/services/attendanceService";
+import { useAsync } from "@/hooks/useAsync";
+import { LoadingState, ErrorState, EmptyState } from "@/components/feedback";
+import { AttendanceFilters, type AttendanceFilterValues } from "@/components/admin/AttendanceFilters";
+import { AttendanceTable } from "@/components/admin/AttendanceTable";
+import { PageHeader } from "@/components/ui/PageHeader";
 
-export const Attendance: React.FC = () => {
+const EMPTY_FILTERS: AttendanceFilterValues = {
+  employeeId: "",
+  startDate: "",
+  endDate: "",
+  status: "",
+};
+
+export function Attendance() {
+  const [filters, setFilters] = useState<AttendanceFilterValues>(EMPTY_FILTERS);
+
+  const { data: employees } = useAsync(getEmployees, []);
+  const {
+    data: attendance,
+    loading,
+    error,
+    refetch,
+  } = useAsync(
+    () =>
+      getAllAttendance({
+        employeeId: filters.employeeId || undefined,
+        startDate: filters.startDate || undefined,
+        endDate: filters.endDate || undefined,
+        status: filters.status || undefined,
+      }),
+    [filters.employeeId, filters.startDate, filters.endDate, filters.status],
+  );
+
+  const activeEmployees = useMemo(
+    () => (employees ?? []).filter((e) => e.employment_status === "active"),
+    [employees],
+  );
+
   return (
     <div className="space-y-6 animate-fade-in">
-      <PageHeader 
-        title="Attendance" 
-        description="Monitor company check-ins." 
+      <PageHeader
+        title="Attendance"
+        description="Monitor company check-ins and review attendance records across all employees."
       />
 
-      {/* Section 1: Attendance Filters */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Attendance Filters</CardTitle>
-        </CardHeader>
-        <CardContent className="py-6 text-center text-text-secondary text-xs">
-          [Filters Placeholder]
-        </CardContent>
-      </Card>
+      <AttendanceFilters employees={activeEmployees} values={filters} onChange={setFilters} />
 
-      {/* Section 2: Attendance Table Placeholder */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Attendance Log Table</CardTitle>
-        </CardHeader>
-        <CardContent className="py-12 text-center text-text-secondary text-xs">
-          [Attendance Table Placeholder]
-        </CardContent>
-      </Card>
+      {loading ? (
+        <LoadingState label="Loading attendance from Supabase…" />
+      ) : error ? (
+        <ErrorState onRetry={refetch} description={error.message} />
+      ) : !attendance || attendance.length === 0 ? (
+        <EmptyState title="No attendance records found" description="Try adjusting your filters." />
+      ) : (
+        <AttendanceTable records={attendance} />
+      )}
     </div>
   );
-};
+}
+
+export default Attendance;
