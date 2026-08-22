@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 
 export interface AvatarProps {
-  src?: string;
+  src?: string | null;
   name: string;
   size?: 'sm' | 'md' | 'lg' | 'xl';
   className?: string;
