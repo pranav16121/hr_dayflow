@@ -11,7 +11,7 @@ interface EmployeeSummaryProps {
 export function EmployeeSummary({ employee }: EmployeeSummaryProps) {
   return (
     <div className="flex flex-col gap-6 sm:flex-row sm:items-center">
-      <Avatar name={employee.full_name} src={employee.profile_picture} size="lg" />
+      <Avatar name={employee.full_name} src={employee.profile_picture ?? undefined} size="lg" />
       <div className="flex-1 space-y-2">
         <div className="flex flex-wrap items-center gap-2">
           <h2 className="text-lg font-semibold text-text-primary">{employee.full_name}</h2>

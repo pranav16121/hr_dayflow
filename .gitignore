@@ -11,6 +11,10 @@ node_modules
 dist
 dist-ssr
 *.local
+*.tsbuildinfo
+
+# Claude Code local project settings
+.claude/
 
 # Editor directories and files
 .vscode/*
@@ -24,3 +28,7 @@ dist-ssr
 *.sw?
 
 .env
+.env.local
+.env.*.local
+.env.production
+.env.development
