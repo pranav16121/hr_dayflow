@@ -59,7 +59,7 @@ export function Navbar({ onOpenMobile, onMenuToggle, portalName = "HR / Admin Po
             <p className="text-sm font-medium text-text-primary">{displayName}</p>
             <p className="text-xs text-text-muted">{displayRole} {displayEmail ? `· ${displayEmail}` : ""}</p>
           </div>
-          <Avatar name={displayName} src={employee?.profile_picture} size="sm" />
+          <Avatar name={displayName} src={employee?.profile_picture ?? undefined} size="sm" />
         </div>
 
         <Button

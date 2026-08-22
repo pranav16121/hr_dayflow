@@ -1,6 +1,14 @@
 import { supabase } from "@/lib/supabaseClient";
 import type { AdminLeaveRequest, LeaveRequest, LeaveStatus, LeaveType } from "@/types";
 
+export interface CreateLeaveRequestInput {
+  employeeId: string;
+  leaveType: LeaveType;
+  startDate: string;
+  endDate: string;
+  remarks?: string | null;
+}
+
 export interface GetAllLeaveRequestsOptions {
   employeeId?: string;
   status?: LeaveStatus;
@@ -73,6 +81,41 @@ export async function getAllLeaveRequests(
   }
 
   return (data as unknown as AdminLeaveRequest[]) ?? [];
+}
+
+/**
+ * Create a new leave request in Supabase public.leave_requests table.
+ */
+export async function createLeaveRequest(input: CreateLeaveRequestInput): Promise<LeaveRequest> {
+  const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(input.employeeId);
+  let resolvedId = input.employeeId;
+  if (!isUuid) {
+    const { data: emp } = await supabase
+      .from("employees")
+      .select("id")
+      .eq("employee_id", input.employeeId)
+      .maybeSingle();
+    if (emp) resolvedId = emp.id;
+  }
+
+  const { data, error } = await supabase
+    .from("leave_requests")
+    .insert({
+      employee_id: resolvedId,
+      leave_type: input.leaveType,
+      start_date: input.startDate,
+      end_date: input.endDate,
+      remarks: input.remarks ?? null,
+    })
+    .select()
+    .single();
+
+  if (error) {
+    console.error("Error creating leave request in Supabase:", error);
+    throw new Error(`Failed to create leave request: ${error.message}`);
+  }
+
+  return data as LeaveRequest;
 }
 
 /**
