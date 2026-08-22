@@ -1,34 +1,49 @@
-import { HTMLAttributes } from "react";
-import { cn } from "@/lib/cn";
-import { initials } from "@/lib/format";
+import React, { useState } from 'react';
 
-interface AvatarProps extends HTMLAttributes<HTMLDivElement> {
+export interface AvatarProps {
+  src?: string;
   name: string;
-  src?: string | null;
-  size?: "sm" | "md" | "lg";
+  size?: 'sm' | 'md' | 'lg' | 'xl';
+  className?: string;
 }
 
-const sizeClasses = {
-  sm: "h-8 w-8 text-xs",
-  md: "h-10 w-10 text-sm",
-  lg: "h-14 w-14 text-lg",
-};
+export const Avatar: React.FC<AvatarProps> = ({
+  src,
+  name,
+  size = 'md',
+  className = '',
+}) => {
+  const [hasError, setHasError] = useState(false);
 
-export function Avatar({ name, src, size = "md", className, ...props }: AvatarProps) {
+  // Generate fallback initials (e.g. "Sriram Prasad" -> "SP")
+  const getInitials = (fullName: string) => {
+    const parts = fullName.trim().split(/\s+/);
+    if (parts.length === 0 || !parts[0]) return '?';
+    if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
+    return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+  };
+
+  const sizes = {
+    sm: 'h-8 w-8 text-[10px]',
+    md: 'h-10 w-10 text-xs',
+    lg: 'h-14 w-14 text-sm',
+    xl: 'h-20 w-20 text-lg',
+  };
+
   return (
     <div
-      className={cn(
-        "flex flex-shrink-0 items-center justify-center overflow-hidden rounded-full bg-primary-light font-semibold text-primary-active",
-        sizeClasses[size],
-        className,
-      )}
-      {...props}
+      className={`relative inline-flex items-center justify-center rounded-full overflow-hidden bg-primary-50 text-primary-700 font-semibold select-none border border-primary-100/50 ${sizes[size]} ${className}`}
     >
-      {src ? (
-        <img src={src} alt={name} className="h-full w-full object-cover" />
+      {src && !hasError ? (
+        <img
+          src={src}
+          alt={name}
+          onError={() => setHasError(true)}
+          className="h-full w-full object-cover"
+        />
       ) : (
-        <span>{initials(name)}</span>
+        <span>{getInitials(name)}</span>
       )}
     </div>
   );
-}
+};
