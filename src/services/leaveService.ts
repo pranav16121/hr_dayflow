@@ -2,6 +2,14 @@ import type { AdminLeaveRequest, LeaveRequest, LeaveStatus, LeaveType } from "@/
 import { mockLeaveRequests } from "@/lib/mockData";
 import { mockDelay } from "./mockDelay";
 
+export interface CreateLeaveRequestInput {
+  employeeId: string;
+  leaveType: LeaveType;
+  startDate: string;
+  endDate: string;
+  remarks?: string | null;
+}
+
 export interface GetAllLeaveRequestsOptions {
   employeeId?: string;
   status?: LeaveStatus;
@@ -24,6 +32,26 @@ export async function getAllLeaveRequests(
 ): Promise<AdminLeaveRequest[]> {
   const filtered = mockLeaveRequests.filter((r) => matches(r, options ?? {}));
   return mockDelay([...filtered]);
+}
+
+export async function createLeaveRequest(input: CreateLeaveRequestInput): Promise<LeaveRequest> {
+  const now = new Date().toISOString();
+  const created: LeaveRequest = {
+    id: `lv-${Math.random().toString(36).slice(2, 9)}`,
+    employee_id: input.employeeId,
+    leave_type: input.leaveType,
+    start_date: input.startDate,
+    end_date: input.endDate,
+    remarks: input.remarks ?? null,
+    status: "pending",
+    admin_comment: null,
+    reviewed_by: null,
+    reviewed_at: null,
+    created_at: now,
+    updated_at: now,
+  };
+  mockLeaveRequests.unshift(created);
+  return mockDelay({ ...created });
 }
 
 export async function getLeaveRequest(leaveRequestId: string): Promise<AdminLeaveRequest> {
