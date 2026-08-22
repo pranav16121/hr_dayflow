@@ -1,3 +1,5 @@
+import type { Employee } from "./employee";
+
 export interface Payroll {
   id: string;
   employee_id: string;
@@ -9,3 +11,12 @@ export interface Payroll {
   updated_at: string;
 }
 
+export interface AdminPayroll extends Payroll {
+  employee?: Pick<Employee, "id" | "employee_id" | "full_name" | "department">;
+}
+
+export interface UpdatePayrollInput {
+  basic_salary: number;
+  allowances: number;
+  deductions: number;
+}

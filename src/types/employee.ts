@@ -17,3 +17,14 @@ export interface Employee {
   updated_at: string;
 }
 
+export interface UpdateEmployeeInput {
+  full_name?: string;
+  email?: string;
+  phone?: string | null;
+  address?: string | null;
+  department?: string | null;
+  designation?: string | null;
+  joining_date?: string | null;
+  profile_picture?: string | null;
+  employment_status?: EmploymentStatus;
+}

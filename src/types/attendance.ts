@@ -1,3 +1,5 @@
+import type { Employee } from "./employee";
+
 export type AttendanceStatus =
   | "present"
   | "absent"
@@ -15,3 +17,6 @@ export interface Attendance {
   updated_at?: string;
 }
 
+export interface AdminAttendance extends Attendance {
+  employee?: Pick<Employee, "id" | "employee_id" | "full_name" | "department">;
+}

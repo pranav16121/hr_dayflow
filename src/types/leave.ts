@@ -1,3 +1,5 @@
+import type { Employee } from "./employee";
+
 export type LeaveType =
   | "paid"
   | "sick"
@@ -23,3 +25,6 @@ export interface LeaveRequest {
   updated_at: string;
 }
 
+export interface AdminLeaveRequest extends LeaveRequest {
+  employee?: Pick<Employee, "id" | "employee_id" | "full_name" | "department">;
+}
