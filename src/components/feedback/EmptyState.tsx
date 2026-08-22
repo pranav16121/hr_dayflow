@@ -1,33 +1,38 @@
-import { ReactNode } from "react";
-import { Inbox } from "lucide-react";
-import { cn } from "@/lib/cn";
+import React from 'react';
+import { Inbox } from 'lucide-react';
+import { Button } from '../ui/Button';
 
-interface EmptyStateProps {
+export interface EmptyStateProps {
   title?: string;
   description?: string;
-  icon?: ReactNode;
-  action?: ReactNode;
+  icon?: React.ReactNode;
+  actionLabel?: string;
+  onAction?: () => void;
   className?: string;
 }
 
-export function EmptyState({
-  title = "Nothing here yet",
-  description,
+export const EmptyState: React.FC<EmptyStateProps> = ({
+  title = 'No records found',
+  description = 'There are no items to display at this time.',
   icon,
-  action,
-  className,
-}: EmptyStateProps) {
+  actionLabel,
+  onAction,
+  className = '',
+}) => {
   return (
-    <div
-      className={cn(
-        "flex flex-col items-center justify-center gap-2 rounded-card border border-dashed border-border bg-surface py-16 text-center",
-        className,
+    <div className={`flex flex-col items-center justify-center p-10 text-center border border-dashed border-border rounded-card bg-surface/50 max-w-md mx-auto ${className}`}>
+      <div className="flex items-center justify-center h-12 w-12 rounded-full bg-zinc-50 text-text-muted mb-4 border border-border/50">
+        {icon || <Inbox className="h-6 w-6" />}
+      </div>
+      <h3 className="text-sm font-semibold text-text-primary mb-1">{title}</h3>
+      <p className="text-xs text-text-muted leading-relaxed mb-6">{description}</p>
+      
+      {actionLabel && onAction && (
+        <Button variant="outline" size="sm" onClick={onAction}>
+          {actionLabel}
+        </Button>
       )}
-    >
-      <div className="mb-1 text-text-muted">{icon ?? <Inbox className="h-8 w-8" />}</div>
-      <p className="text-sm font-semibold text-text-primary">{title}</p>
-      {description && <p className="max-w-sm text-sm text-text-secondary">{description}</p>}
-      {action && <div className="mt-3">{action}</div>}
     </div>
   );
-}
+};
+
