@@ -1,6 +1,6 @@
 import "./App.css";
 
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 
 import MainLayout from "./layouts/MainLayout";
 
@@ -14,13 +14,48 @@ function App() {
   return (
     <BrowserRouter>
       <Routes>
+
+        {/* Employee application */}
         <Route path="/" element={<MainLayout />}>
-          <Route index element={<Dashboard />} />
-          <Route path="profile" element={<Profile />} />
-          <Route path="attendance" element={<Attendance />} />
-          <Route path="leave" element={<Leave />} />
-          <Route path="payroll" element={<Payroll />} />
+
+          <Route
+            index
+            element={<Navigate to="/dashboard" replace />}
+          />
+
+          <Route
+            path="dashboard"
+            element={<Dashboard />}
+          />
+
+          <Route
+            path="profile"
+            element={<Profile />}
+          />
+
+          <Route
+            path="attendance"
+            element={<Attendance />}
+          />
+
+          <Route
+            path="leave"
+            element={<Leave />}
+          />
+
+          <Route
+            path="payroll"
+            element={<Payroll />}
+          />
+
         </Route>
+
+        {/* Unknown URL */}
+        <Route
+          path="*"
+          element={<Navigate to="/dashboard" replace />}
+        />
+
       </Routes>
     </BrowserRouter>
   );
