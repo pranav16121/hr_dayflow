@@ -9,13 +9,13 @@ import { Input } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
 import { loginSchema, type LoginFormValues } from "./loginSchema";
 
-export function LoginPage() {
-  const { signIn, user, isAdmin, loading } = useAuth();
+export function EmployeeLoginPage() {
+  const { signIn, user, isAdmin, profile, loading } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const [authError, setAuthError] = useState<string | null>(null);
 
-  const from = (location.state as { from?: { pathname?: string } })?.from?.pathname || "/admin/dashboard";
+  const from = (location.state as { from?: { pathname?: string } })?.from?.pathname || "/employee/dashboard";
 
   const {
     register,
@@ -30,12 +30,15 @@ export function LoginPage() {
     },
   });
 
-  // If already logged in and admin, redirect
+  // Already signed in — bounce to the portal that matches the account's role.
   useEffect(() => {
-    if (!loading && user && isAdmin) {
+    if (loading || !user) return;
+    if (isAdmin) {
+      navigate("/admin/dashboard", { replace: true });
+    } else if (profile?.role === "employee") {
       navigate(from, { replace: true });
     }
-  }, [loading, user, isAdmin, from, navigate]);
+  }, [loading, user, isAdmin, profile?.role, from, navigate]);
 
   const onSubmit = handleSubmit(async (values) => {
     setAuthError(null);
@@ -51,8 +54,8 @@ export function LoginPage() {
     }
   });
 
-  const handleFillDemoAdmin = () => {
-    setValue("email", "priya.sharma@dayflow.io");
+  const handleFillDemoEmployee = () => {
+    setValue("email", "amogh@dayflow.io");
     setValue("password", "admin123");
     setAuthError(null);
   };
@@ -65,15 +68,15 @@ export function LoginPage() {
             Dayflow <span className="text-primary">HRMS</span>
           </h1>
           <p className="mt-2 text-sm text-text-secondary">
-            Sign in to your account to access the Admin Portal
+            Sign in to your account to access the Employee Portal
           </p>
         </div>
 
         <Card className="mt-8 shadow-modal">
           <CardHeader className="flex-col items-start gap-1">
-            <CardTitle>Admin Sign In</CardTitle>
+            <CardTitle>Employee Sign In</CardTitle>
             <CardDescription>
-              Enter your Supabase credentials to access database operations.
+              Enter your Supabase credentials to view your attendance, leave, and payroll.
             </CardDescription>
           </CardHeader>
 
@@ -95,7 +98,7 @@ export function LoginPage() {
               <Input
                 label="Email address"
                 type="email"
-                placeholder="admin@dayflow.io"
+                placeholder="you@dayflow.io"
                 autoComplete="email"
                 {...register("email")}
                 error={errors.email?.message}
@@ -125,22 +128,22 @@ export function LoginPage() {
                 <span className="text-xs font-medium text-text-muted">Development Demo Account:</span>
                 <button
                   type="button"
-                  onClick={handleFillDemoAdmin}
+                  onClick={handleFillDemoEmployee}
                   className="inline-flex items-center gap-1 text-xs font-semibold text-primary hover:underline"
                 >
-                  <Sparkles className="h-3 w-3" /> Fill Demo Admin
+                  <Sparkles className="h-3 w-3" /> Fill Demo Employee
                 </button>
               </div>
               <p className="mt-1 text-[11px] text-text-muted">
-                Admin: <code className="bg-zinc-100 px-1 py-0.5 rounded text-text-secondary">priya.sharma@dayflow.io</code> / <code className="bg-zinc-100 px-1 py-0.5 rounded text-text-secondary">admin123</code>
+                Employee: <code className="bg-zinc-100 px-1 py-0.5 rounded text-text-secondary">amogh@dayflow.io</code> / <code className="bg-zinc-100 px-1 py-0.5 rounded text-text-secondary">admin123</code>
               </p>
             </div>
           </CardContent>
         </Card>
 
         <p className="mt-6 text-center text-sm text-text-secondary">
-          Looking for the Employee Portal?{" "}
-          <Link to="/employee/login" className="font-semibold text-primary hover:underline">
+          Looking for the Admin Portal?{" "}
+          <Link to="/login" className="font-semibold text-primary hover:underline">
             Sign in here
           </Link>
         </p>
@@ -148,4 +151,3 @@ export function LoginPage() {
     </div>
   );
 }
-
