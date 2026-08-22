@@ -1,30 +1,33 @@
-import { HTMLAttributes } from "react";
-import { cn } from "@/lib/cn";
+import React from 'react';
 
-export type BadgeTone = "neutral" | "primary" | "success" | "warning" | "danger" | "info";
-
-interface BadgeProps extends HTMLAttributes<HTMLSpanElement> {
-  tone?: BadgeTone;
+export interface BadgeProps extends React.HTMLAttributes<HTMLSpanElement> {
+  variant?: 'primary' | 'secondary' | 'success' | 'warning' | 'danger' | 'info' | 'outline';
 }
 
-const toneClasses: Record<BadgeTone, string> = {
-  neutral: "bg-zinc-100 text-text-secondary",
-  primary: "bg-primary-light text-primary-active",
-  success: "bg-success-50 text-success-700",
-  warning: "bg-warning-50 text-warning-700",
-  danger: "bg-danger-50 text-danger-700",
-  info: "bg-info-50 text-info-700",
-};
+export const Badge: React.FC<BadgeProps> = ({
+  children,
+  className = '',
+  variant = 'secondary',
+  ...props
+}) => {
+  const baseStyles = 'inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold select-none border transition-colors';
+  
+  const variants = {
+    primary: 'bg-primary-50 text-primary-700 border-primary-100/80',
+    secondary: 'bg-text-primary/5 text-text-secondary border-text-primary/10',
+    success: 'bg-success-50 text-success-700 border-success-100/80',
+    warning: 'bg-warning-50 text-warning-700 border-warning-100/80',
+    danger: 'bg-danger-50 text-danger-700 border-danger-100/80',
+    info: 'bg-info-50 text-info-700 border-info-100/80',
+    outline: 'bg-transparent text-text-primary border-border',
+  };
 
-export function Badge({ className, tone = "neutral", ...props }: BadgeProps) {
   return (
     <span
-      className={cn(
-        "inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-medium",
-        toneClasses[tone],
-        className,
-      )}
+      className={`${baseStyles} ${variants[variant]} ${className}`}
       {...props}
-    />
+    >
+      {children}
+    </span>
   );
-}
+};

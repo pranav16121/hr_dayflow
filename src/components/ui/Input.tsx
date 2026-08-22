@@ -1,61 +1,91 @@
-import { forwardRef, InputHTMLAttributes, ReactNode, useId } from "react";
-import { cn } from "@/lib/cn";
+import React from 'react';
 
-interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
+export interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
   label?: string;
   error?: string;
-  hint?: string;
-  icon?: ReactNode;
+  helperText?: string;
+  icon?: React.ReactNode;
+  iconPosition?: 'left' | 'right';
 }
 
-export const Input = forwardRef<HTMLInputElement, InputProps>(
-  ({ className, label, error, hint, icon, id, ...props }, ref) => {
-    const generatedId = useId();
-    const inputId = id ?? generatedId;
+export const Input = React.forwardRef<HTMLInputElement, InputProps>(
+  (
+    {
+      className = '',
+      label,
+      error,
+      helperText,
+      required,
+      id,
+      disabled,
+      icon,
+      iconPosition = 'left',
+      type = 'text',
+      ...props
+    },
+    ref
+  ) => {
+    const inputId = id || `input-${Math.random().toString(36).substr(2, 9)}`;
+
+    // Crisp high-contrast border states with soft transparent glows
+    const borderClass = error
+      ? 'border-danger-500 focus-within:ring-danger-500/15 focus-within:border-danger-500'
+      : 'border-border hover:border-zinc-300 focus-within:ring-primary-500/15 focus-within:border-primary-600';
 
     return (
-      <div className="w-full">
+      <div className={`w-full flex flex-col gap-1.5 ${disabled ? 'opacity-50' : ''} ${className}`}>
         {label && (
           <label
             htmlFor={inputId}
-            className="mb-1.5 block text-[11px] font-semibold uppercase tracking-wide text-text-secondary"
+            className="text-[11px] font-semibold uppercase tracking-wider text-text-secondary select-none"
           >
             {label}
+            {required && <span className="text-danger-500 ml-1" aria-hidden="true">*</span>}
           </label>
         )}
-        <div className="relative">
-          {icon && (
-            <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-text-muted">
+        
+        <div
+          className={`flex items-center w-full bg-surface border rounded-input shadow-subtle overflow-hidden transition-all duration-200 focus-within:ring-4 focus-within:ring-offset-0 ${borderClass}`}
+        >
+          {icon && iconPosition === 'left' && (
+            <div className="flex items-center justify-center pl-3 text-text-muted select-none">
               {icon}
-            </span>
+            </div>
           )}
+          
           <input
             ref={ref}
             id={inputId}
-            aria-invalid={!!error}
-            aria-describedby={error ? `${inputId}-error` : hint ? `${inputId}-hint` : undefined}
-            className={cn(
-              "h-10 w-full rounded-button border border-border bg-surface px-3 text-sm text-text-primary placeholder:text-text-muted",
-              "transition-shadow focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary-outline",
-              icon && "pl-9",
-              error && "border-danger-700 focus:border-danger-700 focus:ring-danger-700/10",
-              className,
-            )}
+            type={type}
+            disabled={disabled}
+            required={required}
+            className={`w-full bg-transparent text-sm py-2.5 px-3.5 text-text-primary placeholder:text-text-muted focus:outline-none focus:ring-0 focus:ring-offset-0 disabled:cursor-not-allowed ${
+              icon && iconPosition === 'left' ? 'pl-2' : ''
+            } ${icon && iconPosition === 'right' ? 'pr-2' : ''}`}
             {...props}
           />
+
+          {icon && iconPosition === 'right' && (
+            <div className="flex items-center justify-center pr-3 text-text-muted select-none">
+              {icon}
+            </div>
+          )}
         </div>
-        {error ? (
-          <p id={`${inputId}-error`} className="mt-1.5 text-xs text-danger-700">
+
+        {error && (
+          <span className="text-xs text-danger-600 font-medium" role="alert">
             {error}
-          </p>
-        ) : hint ? (
-          <p id={`${inputId}-hint`} className="mt-1.5 text-xs text-text-muted">
-            {hint}
-          </p>
-        ) : null}
+          </span>
+        )}
+
+        {!error && helperText && (
+          <span className="text-xs text-text-muted select-none">
+            {helperText}
+          </span>
+        )}
       </div>
     );
-  },
+  }
 );
 
-Input.displayName = "Input";
+Input.displayName = 'Input';

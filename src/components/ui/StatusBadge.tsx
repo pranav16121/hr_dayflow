@@ -1,33 +1,51 @@
-import type { AttendanceStatus } from "@/types/attendance";
-import type { LeaveStatus } from "@/types/leave";
-import type { EmploymentStatus } from "@/types/employee";
-import { Badge, type BadgeTone } from "./Badge";
+import React from 'react';
+import { Badge } from './Badge';
 
-type Status = AttendanceStatus | LeaveStatus | EmploymentStatus;
+// Explicit type for allowed Dayflow statuses
+export type DayflowStatus = 
+  | 'present'
+  | 'absent'
+  | 'half_day'
+  | 'leave'
+  | 'pending'
+  | 'approved'
+  | 'rejected';
 
-const STATUS_CONFIG: Record<Status, { label: string; tone: BadgeTone }> = {
-  present: { label: "Present", tone: "success" },
-  absent: { label: "Absent", tone: "danger" },
-  half_day: { label: "Half Day", tone: "warning" },
-  leave: { label: "Leave", tone: "info" },
-  pending: { label: "Pending", tone: "warning" },
-  approved: { label: "Approved", tone: "success" },
-  rejected: { label: "Rejected", tone: "danger" },
-  active: { label: "Active", tone: "success" },
-  inactive: { label: "Inactive", tone: "neutral" },
-};
-
-interface StatusBadgeProps {
-  status: Status;
+export interface StatusBadgeProps {
+  status: DayflowStatus;
   className?: string;
 }
 
-export function StatusBadge({ status, className }: StatusBadgeProps) {
-  const config = STATUS_CONFIG[status] ?? { label: status, tone: "neutral" as BadgeTone };
+export const StatusBadge: React.FC<StatusBadgeProps> = ({ status, className = '' }) => {
+  // Mapping statuses to Badge variants
+  const variantMap: Record<DayflowStatus, 'success' | 'danger' | 'warning' | 'info'> = {
+    present: 'success',
+    absent: 'danger',
+    half_day: 'warning',
+    leave: 'info',
+    pending: 'warning',
+    approved: 'success',
+    rejected: 'danger',
+  };
+
+  // Human-readable labels mapping
+  const labelMap: Record<DayflowStatus, string> = {
+    present: 'Present',
+    absent: 'Absent',
+    half_day: 'Half Day',
+    leave: 'On Leave',
+    pending: 'Pending',
+    approved: 'Approved',
+    rejected: 'Rejected',
+  };
+
+  const variant = variantMap[status] || 'secondary';
+  const label = labelMap[status] || status;
+
   return (
-    <Badge tone={config.tone} className={className}>
-      <span className="h-1.5 w-1.5 rounded-full bg-current" aria-hidden="true" />
-      {config.label}
+    <Badge variant={variant} className={`${className}`}>
+      {label}
     </Badge>
   );
-}
+};
+
