@@ -3,6 +3,7 @@ import { Toaster } from "sonner";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 import { LoginPage } from "@/pages/auth/LoginPage";
+import { EmployeeLoginPage } from "@/pages/auth/EmployeeLoginPage";
 
 // Layouts
 import { AdminLayout } from "@/layouts/AdminLayout";
@@ -42,8 +43,9 @@ export function App() {
     <AuthProvider>
       <Toaster position="top-right" richColors />
       <Routes>
-        {/* Supabase Authentication Route */}
+        {/* Supabase Authentication Routes */}
         <Route path="/login" element={<LoginPage />} />
+        <Route path="/employee/login" element={<EmployeeLoginPage />} />
 
         {/* Development Component Showcase */}
         <Route path="/dev/component-showcase" element={<ShowcaseLayout />}>
@@ -56,18 +58,20 @@ export function App() {
           <Route path="feedback" element={<ShowcaseFeedback />} />
         </Route>
 
-        {/* Employee Portal Routes */}
-        <Route path="/employee" element={<EmployeeLayout />}>
-          <Route index element={<Navigate to="/employee/dashboard" replace />} />
-          <Route path="dashboard" element={<EmployeeDashboard />} />
-          <Route path="profile" element={<EmployeeProfile />} />
-          <Route path="attendance" element={<EmployeeAttendance />} />
-          <Route path="leave" element={<EmployeeLeave />} />
-          <Route path="payroll" element={<EmployeePayroll />} />
+        {/* Protected Employee Portal Routes */}
+        <Route element={<ProtectedRoute role="employee" />}>
+          <Route path="/employee" element={<EmployeeLayout />}>
+            <Route index element={<Navigate to="/employee/dashboard" replace />} />
+            <Route path="dashboard" element={<EmployeeDashboard />} />
+            <Route path="profile" element={<EmployeeProfile />} />
+            <Route path="attendance" element={<EmployeeAttendance />} />
+            <Route path="leave" element={<EmployeeLeave />} />
+            <Route path="payroll" element={<EmployeePayroll />} />
+          </Route>
         </Route>
 
         {/* Protected Admin / HR Portal Routes */}
-        <Route element={<ProtectedRoute requireAdmin />}>
+        <Route element={<ProtectedRoute role="admin" />}>
           <Route path="/admin" element={<AdminLayout />}>
             <Route index element={<Navigate to="/admin/dashboard" replace />} />
             <Route path="dashboard" element={<AdminDashboard />} />
