@@ -1,36 +1,42 @@
-import { AlertTriangle } from "lucide-react";
-import { cn } from "@/lib/cn";
-import { Button } from "@/components/ui/Button";
+import React from 'react';
+import { AlertCircle, RotateCcw } from 'lucide-react';
+import { Button } from '../ui/Button';
 
-interface ErrorStateProps {
+export interface ErrorStateProps {
   title?: string;
+  message?: string;
   description?: string;
   onRetry?: () => void;
   className?: string;
 }
 
-export function ErrorState({
-  title = "Something went wrong",
-  description = "We couldn't load this data. Please try again.",
+export const ErrorState: React.FC<ErrorStateProps> = ({
+  title = 'Something went wrong',
+  message,
+  description,
   onRetry,
-  className,
-}: ErrorStateProps) {
+  className = '',
+}) => {
+  const text = description || message || 'An error occurred while loading the data. Please try again.';
+
   return (
-    <div
-      role="alert"
-      className={cn(
-        "flex flex-col items-center justify-center gap-2 rounded-card border border-danger-700/20 bg-danger-50 py-16 text-center",
-        className,
-      )}
-    >
-      <AlertTriangle className="mb-1 h-8 w-8 text-danger-700" aria-hidden="true" />
-      <p className="text-sm font-semibold text-danger-700">{title}</p>
-      <p className="max-w-sm text-sm text-danger-700/80">{description}</p>
+    <div className={`flex flex-col items-center justify-center p-8 text-center border border-danger-100 rounded-card bg-danger-50/30 max-w-md mx-auto ${className}`}>
+      <div className="flex items-center justify-center h-12 w-12 rounded-full bg-danger-50 text-danger-600 mb-4 border border-danger-100">
+        <AlertCircle className="h-6 w-6" />
+      </div>
+      <h3 className="text-sm font-semibold text-danger-700 mb-1">{title}</h3>
+      <p className="text-xs text-text-secondary leading-relaxed mb-6">{text}</p>
+      
       {onRetry && (
-        <Button variant="danger" size="sm" className="mt-3" onClick={onRetry}>
-          Retry
+        <Button 
+          variant="danger" 
+          size="sm" 
+          icon={<RotateCcw className="h-3.5 w-3.5" />} 
+          onClick={onRetry}
+        >
+          Try Again
         </Button>
       )}
     </div>
   );
-}
+};

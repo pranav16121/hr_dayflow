@@ -1,48 +1,69 @@
-import { forwardRef, TextareaHTMLAttributes, useId } from "react";
-import { cn } from "@/lib/cn";
+import React from 'react';
 
-interface TextareaProps extends TextareaHTMLAttributes<HTMLTextAreaElement> {
+export interface TextareaProps extends React.TextareaHTMLAttributes<HTMLTextAreaElement> {
   label?: string;
   error?: string;
-  hint?: string;
+  helperText?: string;
 }
 
-export const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
-  ({ className, label, error, hint, id, rows = 4, ...props }, ref) => {
-    const generatedId = useId();
-    const textareaId = id ?? generatedId;
+export const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
+  (
+    {
+      className = '',
+      label,
+      error,
+      helperText,
+      required,
+      id,
+      disabled,
+      rows = 3,
+      ...props
+    },
+    ref
+  ) => {
+    const generatedId = React.useId();
+    const textareaId = id || generatedId;
+
+    const borderClass = error
+      ? 'border-danger-500 focus:ring-danger-500/15 focus:border-danger-500'
+      : 'border-border hover:border-zinc-300 focus:ring-primary-500/15 focus:border-primary-600';
 
     return (
-      <div className="w-full">
+      <div className={`w-full flex flex-col gap-1.5 ${disabled ? 'opacity-50' : ''} ${className}`}>
         {label && (
           <label
             htmlFor={textareaId}
-            className="mb-1.5 block text-[11px] font-semibold uppercase tracking-wide text-text-secondary"
+            className="text-[11px] font-semibold uppercase tracking-wider text-text-secondary select-none"
           >
             {label}
+            {required && <span className="text-danger-500 ml-1" aria-hidden="true">*</span>}
           </label>
         )}
+
         <textarea
           ref={ref}
           id={textareaId}
+          disabled={disabled}
+          required={required}
           rows={rows}
-          aria-invalid={!!error}
-          className={cn(
-            "w-full resize-none rounded-button border border-border bg-surface px-3 py-2 text-sm text-text-primary placeholder:text-text-muted",
-            "focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary-outline",
-            error && "border-danger-700 focus:border-danger-700 focus:ring-danger-700/10",
-            className,
-          )}
+          className={`w-full bg-surface border rounded-input shadow-subtle text-sm py-2.5 px-3.5 text-text-primary placeholder:text-text-muted transition-all duration-200 focus:outline-none focus:ring-4 focus:ring-offset-0 disabled:cursor-not-allowed resize-y min-h-[70px] ${borderClass}`}
           {...props}
         />
-        {error ? (
-          <p className="mt-1.5 text-xs text-danger-700">{error}</p>
-        ) : hint ? (
-          <p className="mt-1.5 text-xs text-text-muted">{hint}</p>
-        ) : null}
+
+        {error && (
+          <span className="text-xs text-danger-600 font-medium" role="alert">
+            {error}
+          </span>
+        )}
+
+        {!error && helperText && (
+          <span className="text-xs text-text-muted select-none">
+            {helperText}
+          </span>
+        )}
       </div>
     );
-  },
+  }
 );
 
-Textarea.displayName = "Textarea";
+Textarea.displayName = 'Textarea';

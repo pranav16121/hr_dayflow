@@ -5,6 +5,7 @@ import { useAsync } from "@/hooks/useAsync";
 import { LoadingState, ErrorState, EmptyState } from "@/components/feedback";
 import { AttendanceFilters, type AttendanceFilterValues } from "@/components/admin/AttendanceFilters";
 import { AttendanceTable } from "@/components/admin/AttendanceTable";
+import { PageHeader } from "@/components/ui/PageHeader";
 
 const EMPTY_FILTERS: AttendanceFilterValues = {
   employeeId: "",
@@ -13,7 +14,7 @@ const EMPTY_FILTERS: AttendanceFilterValues = {
   status: "",
 };
 
-export function AdminAttendancePage() {
+export function Attendance() {
   const [filters, setFilters] = useState<AttendanceFilterValues>(EMPTY_FILTERS);
 
   const { data: employees } = useAsync(getEmployees, []);
@@ -39,18 +40,18 @@ export function AdminAttendancePage() {
   );
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold text-text-primary">Attendance</h1>
-        <p className="mt-1 text-sm text-text-secondary">Review attendance records across all employees.</p>
-      </div>
+    <div className="space-y-6 animate-fade-in">
+      <PageHeader
+        title="Attendance"
+        description="Monitor company check-ins and review attendance records across all employees."
+      />
 
       <AttendanceFilters employees={activeEmployees} values={filters} onChange={setFilters} />
 
       {loading ? (
-        <LoadingState label="Loading attendance…" />
+        <LoadingState label="Loading attendance from Supabase…" />
       ) : error ? (
-        <ErrorState onRetry={refetch} />
+        <ErrorState onRetry={refetch} description={error.message} />
       ) : !attendance || attendance.length === 0 ? (
         <EmptyState title="No attendance records found" description="Try adjusting your filters." />
       ) : (
@@ -59,3 +60,5 @@ export function AdminAttendancePage() {
     </div>
   );
 }
+
+export default Attendance;

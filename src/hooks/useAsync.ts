@@ -31,3 +31,4 @@ export function useAsync<T>(fn: () => Promise<T>, deps: unknown[] = []) {
 
   return { ...state, refetch: run };
 }
+

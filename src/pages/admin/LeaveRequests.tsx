@@ -8,6 +8,7 @@ import { LoadingState, ErrorState, EmptyState } from "@/components/feedback";
 import { LeaveFilters, type LeaveFilterValues } from "@/components/admin/LeaveFilters";
 import { LeaveTable } from "@/components/admin/LeaveTable";
 import { LeaveReviewModal } from "@/components/admin/LeaveReviewModal";
+import { PageHeader } from "@/components/ui/PageHeader";
 
 const EMPTY_FILTERS: LeaveFilterValues = {
   employeeId: "",
@@ -17,7 +18,7 @@ const EMPTY_FILTERS: LeaveFilterValues = {
   endDate: "",
 };
 
-export function AdminLeavesPage() {
+export function LeaveRequests() {
   const [filters, setFilters] = useState<LeaveFilterValues>(EMPTY_FILTERS);
   const [reviewing, setReviewing] = useState<AdminLeaveRequest | null>(null);
 
@@ -47,7 +48,7 @@ export function AdminLeavesPage() {
   async function handleApprove(leaveRequestId: string, adminComment?: string) {
     try {
       await approveLeave(leaveRequestId, adminComment);
-      toast.success("Leave request approved");
+      toast.success("Leave request approved in Supabase");
       setReviewing(null);
       refetch();
     } catch (err) {
@@ -58,7 +59,7 @@ export function AdminLeavesPage() {
   async function handleReject(leaveRequestId: string, adminComment?: string) {
     try {
       await rejectLeave(leaveRequestId, adminComment);
-      toast.success("Leave request rejected");
+      toast.success("Leave request rejected in Supabase");
       setReviewing(null);
       refetch();
     } catch (err) {
@@ -67,18 +68,18 @@ export function AdminLeavesPage() {
   }
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold text-text-primary">Leave Requests</h1>
-        <p className="mt-1 text-sm text-text-secondary">Review, approve, or reject employee leave requests.</p>
-      </div>
+    <div className="space-y-6 animate-fade-in">
+      <PageHeader
+        title="Leave Requests"
+        description="Review, approve, or reject employee time-off applications with live database updates."
+      />
 
       <LeaveFilters employees={activeEmployees} values={filters} onChange={setFilters} />
 
       {loading ? (
-        <LoadingState label="Loading leave requests…" />
+        <LoadingState label="Loading leave requests from Supabase…" />
       ) : error ? (
-        <ErrorState onRetry={refetch} />
+        <ErrorState onRetry={refetch} description={error.message} />
       ) : !leaveRequests || leaveRequests.length === 0 ? (
         <EmptyState title="No leave requests found" description="Try adjusting your filters." />
       ) : (
@@ -94,3 +95,5 @@ export function AdminLeavesPage() {
     </div>
   );
 }
+
+export default LeaveRequests;

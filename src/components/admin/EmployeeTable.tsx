@@ -31,7 +31,7 @@ export function EmployeeTable({ employees }: EmployeeTableProps) {
           >
             <TableCell>
               <div className="flex items-center gap-3">
-                <Avatar name={emp.full_name} src={emp.profile_picture} size="sm" />
+                <Avatar name={emp.full_name} src={emp.profile_picture ?? undefined} size="sm" />
                 <div>
                   <p className="font-medium text-text-primary">{emp.full_name}</p>
                   <p className="text-xs text-text-muted">{emp.email}</p>
@@ -50,3 +50,4 @@ export function EmployeeTable({ employees }: EmployeeTableProps) {
     </Table>
   );
 }
+

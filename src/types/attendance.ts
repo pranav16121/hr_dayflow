@@ -1,6 +1,10 @@
 import type { Employee } from "./employee";
 
-export type AttendanceStatus = "present" | "absent" | "half_day" | "leave";
+export type AttendanceStatus =
+  | "present"
+  | "absent"
+  | "half_day"
+  | "leave";
 
 export interface Attendance {
   id: string;
@@ -9,6 +13,8 @@ export interface Attendance {
   check_in: string | null;
   check_out: string | null;
   status: AttendanceStatus;
+  created_at?: string;
+  updated_at?: string;
 }
 
 export interface AdminAttendance extends Attendance {

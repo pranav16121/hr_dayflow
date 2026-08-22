@@ -1,6 +1,5 @@
+import { supabase } from "@/lib/supabaseClient";
 import type { AdminLeaveRequest, LeaveRequest, LeaveStatus, LeaveType } from "@/types";
-import { mockLeaveRequests } from "@/lib/mockData";
-import { mockDelay } from "./mockDelay";
 
 export interface CreateLeaveRequestInput {
   employeeId: string;
@@ -18,83 +17,210 @@ export interface GetAllLeaveRequestsOptions {
   endDate?: string;
 }
 
-function matches(record: AdminLeaveRequest, opts: GetAllLeaveRequestsOptions): boolean {
-  if (opts.employeeId && record.employee_id !== opts.employeeId) return false;
-  if (opts.status && record.status !== opts.status) return false;
-  if (opts.leaveType && record.leave_type !== opts.leaveType) return false;
-  if (opts.startDate && record.end_date < opts.startDate) return false;
-  if (opts.endDate && record.start_date > opts.endDate) return false;
-  return true;
-}
-
+/**
+ * Fetch all leave requests from Supabase public.leave_requests joined with employee details.
+ */
 export async function getAllLeaveRequests(
   options?: GetAllLeaveRequestsOptions,
 ): Promise<AdminLeaveRequest[]> {
-  const filtered = mockLeaveRequests.filter((r) => matches(r, options ?? {}));
-  return mockDelay([...filtered]);
+  let query = supabase
+    .from("leave_requests")
+    .select(`
+      id,
+      employee_id,
+      leave_type,
+      start_date,
+      end_date,
+      remarks,
+      status,
+      admin_comment,
+      reviewed_by,
+      reviewed_at,
+      created_at,
+      updated_at,
+      employee:employees (
+        id,
+        employee_id,
+        full_name,
+        department
+      )
+    `)
+    .order("created_at", { ascending: false });
+
+  if (options?.employeeId) {
+    const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(options.employeeId);
+    let resolvedId = options.employeeId;
+    if (!isUuid) {
+      const { data: emp } = await supabase
+        .from("employees")
+        .select("id")
+        .eq("employee_id", options.employeeId)
+        .maybeSingle();
+      if (emp) resolvedId = emp.id;
+    }
+    query = query.eq("employee_id", resolvedId);
+  }
+  if (options?.status) {
+    query = query.eq("status", options.status);
+  }
+  if (options?.leaveType) {
+    query = query.eq("leave_type", options.leaveType);
+  }
+  if (options?.startDate) {
+    query = query.gte("start_date", options.startDate);
+  }
+  if (options?.endDate) {
+    query = query.lte("end_date", options.endDate);
+  }
+
+  const { data, error } = await query;
+
+  if (error) {
+    console.error("Error fetching leave requests from Supabase:", error);
+    throw new Error(`Failed to fetch leave requests: ${error.message}`);
+  }
+
+  return (data as unknown as AdminLeaveRequest[]) ?? [];
 }
 
+/**
+ * Create a new leave request in Supabase public.leave_requests table.
+ */
 export async function createLeaveRequest(input: CreateLeaveRequestInput): Promise<LeaveRequest> {
-  const now = new Date().toISOString();
-  const created: LeaveRequest = {
-    id: `lv-${Math.random().toString(36).slice(2, 9)}`,
-    employee_id: input.employeeId,
-    leave_type: input.leaveType,
-    start_date: input.startDate,
-    end_date: input.endDate,
-    remarks: input.remarks ?? null,
-    status: "pending",
-    admin_comment: null,
-    reviewed_by: null,
-    reviewed_at: null,
-    created_at: now,
-    updated_at: now,
-  };
-  mockLeaveRequests.unshift(created);
-  return mockDelay({ ...created });
+  const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(input.employeeId);
+  let resolvedId = input.employeeId;
+  if (!isUuid) {
+    const { data: emp } = await supabase
+      .from("employees")
+      .select("id")
+      .eq("employee_id", input.employeeId)
+      .maybeSingle();
+    if (emp) resolvedId = emp.id;
+  }
+
+  const { data, error } = await supabase
+    .from("leave_requests")
+    .insert({
+      employee_id: resolvedId,
+      leave_type: input.leaveType,
+      start_date: input.startDate,
+      end_date: input.endDate,
+      remarks: input.remarks ?? null,
+    })
+    .select()
+    .single();
+
+  if (error) {
+    console.error("Error creating leave request in Supabase:", error);
+    throw new Error(`Failed to create leave request: ${error.message}`);
+  }
+
+  return data as LeaveRequest;
 }
 
+/**
+ * Fetch a single leave request by ID.
+ */
 export async function getLeaveRequest(leaveRequestId: string): Promise<AdminLeaveRequest> {
-  const record = mockLeaveRequests.find((r) => r.id === leaveRequestId);
-  if (!record) {
-    throw new Error(`Leave request ${leaveRequestId} not found`);
+  const { data, error } = await supabase
+    .from("leave_requests")
+    .select(`
+      id,
+      employee_id,
+      leave_type,
+      start_date,
+      end_date,
+      remarks,
+      status,
+      admin_comment,
+      reviewed_by,
+      reviewed_at,
+      created_at,
+      updated_at,
+      employee:employees (
+        id,
+        employee_id,
+        full_name,
+        department
+      )
+    `)
+    .eq("id", leaveRequestId)
+    .single();
+
+  if (error) {
+    console.error(`Error fetching leave request ${leaveRequestId}:`, error);
+    throw new Error(`Failed to fetch leave request: ${error.message}`);
   }
-  return mockDelay({ ...record });
+
+  return data as unknown as AdminLeaveRequest;
 }
 
-function review(
-  leaveRequestId: string,
-  status: "approved" | "rejected",
-  adminComment?: string,
-): LeaveRequest {
-  const index = mockLeaveRequests.findIndex((r) => r.id === leaveRequestId);
-  if (index === -1) {
-    throw new Error(`Leave request ${leaveRequestId} not found`);
-  }
-  const now = new Date().toISOString();
-  const updated: AdminLeaveRequest = {
-    ...mockLeaveRequests[index],
-    status,
-    admin_comment: adminComment ?? null,
-    reviewed_at: now,
-    updated_at: now,
-  };
-  mockLeaveRequests[index] = updated;
-  return updated;
-}
-
+/**
+ * Approve a leave request via Supabase RPC or direct table update.
+ */
 export async function approveLeave(
   leaveRequestId: string,
   adminComment?: string,
 ): Promise<LeaveRequest> {
-  const updated = review(leaveRequestId, "approved", adminComment);
-  return mockDelay({ ...updated });
+  const { data, error } = await supabase.rpc("approve_leave_request", {
+    p_leave_request_id: leaveRequestId,
+    p_admin_comment: adminComment ?? null,
+  });
+
+  if (error) {
+    // Fallback to direct update if RPC is not deployed yet or called with direct admin privileges
+    const { data: updated, error: updateError } = await supabase
+      .from("leave_requests")
+      .update({
+        status: "approved",
+        admin_comment: adminComment ?? null,
+        reviewed_at: new Date().toISOString(),
+      })
+      .eq("id", leaveRequestId)
+      .select()
+      .single();
+
+    if (updateError) {
+      console.error(`Error approving leave request ${leaveRequestId}:`, updateError);
+      throw new Error(`Failed to approve leave request: ${updateError.message}`);
+    }
+    return updated as LeaveRequest;
+  }
+
+  return data as LeaveRequest;
 }
 
+/**
+ * Reject a leave request via Supabase RPC or direct table update.
+ */
 export async function rejectLeave(
   leaveRequestId: string,
   adminComment?: string,
 ): Promise<LeaveRequest> {
-  const updated = review(leaveRequestId, "rejected", adminComment);
-  return mockDelay({ ...updated });
+  const { data, error } = await supabase.rpc("reject_leave_request", {
+    p_leave_request_id: leaveRequestId,
+    p_admin_comment: adminComment ?? null,
+  });
+
+  if (error) {
+    // Fallback to direct update if RPC is not deployed yet or called with direct admin privileges
+    const { data: updated, error: updateError } = await supabase
+      .from("leave_requests")
+      .update({
+        status: "rejected",
+        admin_comment: adminComment ?? null,
+        reviewed_at: new Date().toISOString(),
+      })
+      .eq("id", leaveRequestId)
+      .select()
+      .single();
+
+    if (updateError) {
+      console.error(`Error rejecting leave request ${leaveRequestId}:`, updateError);
+      throw new Error(`Failed to reject leave request: ${updateError.message}`);
+    }
+    return updated as LeaveRequest;
+  }
+
+  return data as LeaveRequest;
 }

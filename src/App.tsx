@@ -1,45 +1,89 @@
 import { Navigate, Route, Routes } from "react-router-dom";
 import { Toaster } from "sonner";
-import { AdminLayout } from "@/components/layout/AdminLayout";
-import { AdminDashboardPage } from "@/pages/admin/AdminDashboardPage";
+import { AuthProvider } from "@/contexts/AuthContext";
+import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
+import { LoginPage } from "@/pages/auth/LoginPage";
+
+// Layouts
+import { AdminLayout } from "@/layouts/AdminLayout";
+import { EmployeeLayout } from "@/layouts/EmployeeLayout";
+import { ShowcaseLayout } from "@/layouts/ShowcaseLayout";
+
+// Admin Portal Pages
+import { Dashboard as AdminDashboard } from "@/pages/admin/Dashboard";
 import { AdminEmployeesPage } from "@/pages/admin/AdminEmployeesPage";
 import { AdminEmployeeDetailPage } from "@/pages/admin/AdminEmployeeDetailPage";
-import { AdminAttendancePage } from "@/pages/admin/AdminAttendancePage";
-import { AdminLeavesPage } from "@/pages/admin/AdminLeavesPage";
-import { AdminPayrollPage } from "@/pages/admin/AdminPayrollPage";
-import { EmployeeLayout } from "@/components/layout/EmployeeLayout";
-import { EmployeeDashboardPage } from "@/pages/employee/EmployeeDashboardPage";
-import { EmployeeAttendancePage } from "@/pages/employee/EmployeeAttendancePage";
-import { EmployeeLeavePage } from "@/pages/employee/EmployeeLeavePage";
-import { EmployeePayrollPage } from "@/pages/employee/EmployeePayrollPage";
-import { EmployeeProfilePage } from "@/pages/employee/EmployeeProfilePage";
+import { Attendance as AdminAttendance } from "@/pages/admin/Attendance";
+import { LeaveRequests as AdminLeaveRequests } from "@/pages/admin/LeaveRequests";
+import { Payroll as AdminPayroll } from "@/pages/admin/Payroll";
 
-function App() {
+// Employee Portal Pages
+import { Dashboard as EmployeeDashboard } from "@/pages/employee/Dashboard";
+import { Profile as EmployeeProfile } from "@/pages/employee/Profile";
+import { Attendance as EmployeeAttendance } from "@/pages/employee/Attendance";
+import { Leave as EmployeeLeave } from "@/pages/employee/Leave";
+import { Payroll as EmployeePayroll } from "@/pages/employee/Payroll";
+
+// Component Showcase Pages
+import {
+  ShowcaseTypography,
+  ShowcaseButtons,
+  ShowcaseForms,
+  ShowcaseBadges,
+  ShowcaseTables,
+  ShowcaseFeedback,
+} from "@/pages/Showcase";
+
+// 404 Page
+import { NotFound } from "@/pages/NotFound";
+
+export function App() {
   return (
-    <>
+    <AuthProvider>
       <Toaster position="top-right" richColors />
       <Routes>
-        <Route path="/" element={<Navigate to="/admin/dashboard" replace />} />
-        <Route path="/admin" element={<AdminLayout />}>
-          <Route path="dashboard" element={<AdminDashboardPage />} />
-          <Route path="employees" element={<AdminEmployeesPage />} />
-          <Route path="employees/:employeeId" element={<AdminEmployeeDetailPage />} />
-          <Route path="attendance" element={<AdminAttendancePage />} />
-          <Route path="leaves" element={<AdminLeavesPage />} />
-          <Route path="payroll" element={<AdminPayrollPage />} />
-          <Route index element={<Navigate to="/admin/dashboard" replace />} />
+        {/* Supabase Authentication Route */}
+        <Route path="/login" element={<LoginPage />} />
+
+        {/* Development Component Showcase */}
+        <Route path="/dev/component-showcase" element={<ShowcaseLayout />}>
+          <Route index element={<Navigate to="/dev/component-showcase/typography" replace />} />
+          <Route path="typography" element={<ShowcaseTypography />} />
+          <Route path="buttons" element={<ShowcaseButtons />} />
+          <Route path="forms" element={<ShowcaseForms />} />
+          <Route path="badges" element={<ShowcaseBadges />} />
+          <Route path="tables" element={<ShowcaseTables />} />
+          <Route path="feedback" element={<ShowcaseFeedback />} />
         </Route>
+
+        {/* Employee Portal Routes */}
         <Route path="/employee" element={<EmployeeLayout />}>
-          <Route path="dashboard" element={<EmployeeDashboardPage />} />
-          <Route path="attendance" element={<EmployeeAttendancePage />} />
-          <Route path="leave" element={<EmployeeLeavePage />} />
-          <Route path="payroll" element={<EmployeePayrollPage />} />
-          <Route path="profile" element={<EmployeeProfilePage />} />
           <Route index element={<Navigate to="/employee/dashboard" replace />} />
+          <Route path="dashboard" element={<EmployeeDashboard />} />
+          <Route path="profile" element={<EmployeeProfile />} />
+          <Route path="attendance" element={<EmployeeAttendance />} />
+          <Route path="leave" element={<EmployeeLeave />} />
+          <Route path="payroll" element={<EmployeePayroll />} />
         </Route>
-        <Route path="*" element={<Navigate to="/admin/dashboard" replace />} />
+
+        {/* Protected Admin / HR Portal Routes */}
+        <Route element={<ProtectedRoute requireAdmin />}>
+          <Route path="/admin" element={<AdminLayout />}>
+            <Route index element={<Navigate to="/admin/dashboard" replace />} />
+            <Route path="dashboard" element={<AdminDashboard />} />
+            <Route path="employees" element={<AdminEmployeesPage />} />
+            <Route path="employees/:employeeId" element={<AdminEmployeeDetailPage />} />
+            <Route path="attendance" element={<AdminAttendance />} />
+            <Route path="leaves" element={<AdminLeaveRequests />} />
+            <Route path="payroll" element={<AdminPayroll />} />
+          </Route>
+        </Route>
+
+        {/* Root and Fallback Routes */}
+        <Route path="/" element={<Navigate to="/admin/dashboard" replace />} />
+        <Route path="*" element={<NotFound />} />
       </Routes>
-    </>
+    </AuthProvider>
   );
 }
 

@@ -48,3 +48,4 @@ export function PayrollTable({ records, onEdit }: PayrollTableProps) {
     </Table>
   );
 }
+

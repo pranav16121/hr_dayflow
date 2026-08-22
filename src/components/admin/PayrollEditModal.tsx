@@ -79,12 +79,12 @@ export function PayrollEditModal({ record, onClose, onSubmit }: PayrollEditModal
           error={errors.deductions?.message}
         />
 
-        <div className="rounded-button bg-primary-light p-4">
-          <p className="text-[11px] font-semibold uppercase tracking-wide text-primary-active">
+        <div className="rounded-button bg-primary-50 p-4 border border-primary-100/50">
+          <p className="text-[11px] font-semibold uppercase tracking-wide text-primary-700">
             Estimated Net Salary (preview)
           </p>
-          <p className="mt-1 text-lg font-bold text-primary-active">{formatCurrency(previewNet)}</p>
-          <p className="mt-1 text-xs text-primary-active/70">
+          <p className="mt-1 text-lg font-bold text-primary-700">{formatCurrency(previewNet)}</p>
+          <p className="mt-1 text-xs text-primary-700/70">
             Final net salary is calculated and confirmed by the backend after saving.
           </p>
         </div>
@@ -101,3 +101,4 @@ export function PayrollEditModal({ record, onClose, onSubmit }: PayrollEditModal
     </Modal>
   );
 }
+

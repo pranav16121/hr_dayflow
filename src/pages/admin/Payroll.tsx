@@ -6,15 +6,16 @@ import { useAsync } from "@/hooks/useAsync";
 import { LoadingState, ErrorState, EmptyState } from "@/components/feedback";
 import { PayrollTable } from "@/components/admin/PayrollTable";
 import { PayrollEditModal } from "@/components/admin/PayrollEditModal";
+import { PageHeader } from "@/components/ui/PageHeader";
 
-export function AdminPayrollPage() {
+export function Payroll() {
   const { data: payroll, loading, error, refetch } = useAsync(getAllPayroll, []);
   const [editing, setEditing] = useState<AdminPayroll | null>(null);
 
   async function handleSave(employeeId: string, data: UpdatePayrollInput) {
     try {
       await updatePayroll(employeeId, data);
-      toast.success("Payroll updated");
+      toast.success("Payroll structure updated in Supabase");
       setEditing(null);
       refetch();
     } catch (err) {
@@ -23,18 +24,18 @@ export function AdminPayrollPage() {
   }
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold text-text-primary">Payroll</h1>
-        <p className="mt-1 text-sm text-text-secondary">View and update salary structures for all employees.</p>
-      </div>
+    <div className="space-y-6 animate-fade-in">
+      <PageHeader
+        title="Payroll"
+        description="View and manage live salary structures and compensation breakdown for all employees."
+      />
 
       {loading ? (
-        <LoadingState label="Loading payroll…" />
+        <LoadingState label="Loading payroll data from Supabase…" />
       ) : error ? (
-        <ErrorState onRetry={refetch} />
+        <ErrorState onRetry={refetch} description={error.message} />
       ) : !payroll || payroll.length === 0 ? (
-        <EmptyState title="No payroll records found" />
+        <EmptyState title="No payroll records found in database." />
       ) : (
         <PayrollTable records={payroll} onEdit={setEditing} />
       )}
@@ -43,3 +44,5 @@ export function AdminPayrollPage() {
     </div>
   );
 }
+
+export default Payroll;

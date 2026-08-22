@@ -39,3 +39,4 @@ export function AttendanceTable({ records }: AttendanceTableProps) {
     </Table>
   );
 }
+

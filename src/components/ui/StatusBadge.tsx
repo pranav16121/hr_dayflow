@@ -1,33 +1,66 @@
-import type { AttendanceStatus } from "@/types/attendance";
-import type { LeaveStatus } from "@/types/leave";
-import type { EmploymentStatus } from "@/types/employee";
-import { Badge, type BadgeTone } from "./Badge";
+import React from 'react';
+import { Badge } from './Badge';
 
-type Status = AttendanceStatus | LeaveStatus | EmploymentStatus;
+export type DayflowStatus = 
+  | 'present'
+  | 'absent'
+  | 'half_day'
+  | 'leave'
+  | 'pending'
+  | 'approved'
+  | 'rejected'
+  | 'active'
+  | 'inactive'
+  | 'paid'
+  | 'unpaid'
+  | 'sick'
+  | string;
 
-const STATUS_CONFIG: Record<Status, { label: string; tone: BadgeTone }> = {
-  present: { label: "Present", tone: "success" },
-  absent: { label: "Absent", tone: "danger" },
-  half_day: { label: "Half Day", tone: "warning" },
-  leave: { label: "Leave", tone: "info" },
-  pending: { label: "Pending", tone: "warning" },
-  approved: { label: "Approved", tone: "success" },
-  rejected: { label: "Rejected", tone: "danger" },
-  active: { label: "Active", tone: "success" },
-  inactive: { label: "Inactive", tone: "neutral" },
-};
-
-interface StatusBadgeProps {
-  status: Status;
+export interface StatusBadgeProps {
+  status: DayflowStatus;
   className?: string;
 }
 
-export function StatusBadge({ status, className }: StatusBadgeProps) {
-  const config = STATUS_CONFIG[status] ?? { label: status, tone: "neutral" as BadgeTone };
+export const StatusBadge: React.FC<StatusBadgeProps> = ({ status, className = '' }) => {
+  // Mapping statuses to Badge variants
+  const variantMap: Record<string, 'success' | 'danger' | 'warning' | 'info' | 'secondary'> = {
+    present: 'success',
+    active: 'success',
+    approved: 'success',
+    paid: 'success',
+    absent: 'danger',
+    rejected: 'danger',
+    inactive: 'secondary',
+    half_day: 'warning',
+    pending: 'warning',
+    leave: 'info',
+    unpaid: 'warning',
+    sick: 'danger',
+  };
+
+  // Human-readable labels mapping
+  const labelMap: Record<string, string> = {
+    present: 'Present',
+    active: 'Active',
+    inactive: 'Inactive',
+    absent: 'Absent',
+    half_day: 'Half Day',
+    leave: 'On Leave',
+    pending: 'Pending',
+    approved: 'Approved',
+    rejected: 'Rejected',
+    paid: 'Paid Leave',
+    unpaid: 'Unpaid Leave',
+    sick: 'Sick Leave',
+  };
+
+  const normalizedStatus = typeof status === 'string' ? status.toLowerCase() : '';
+  const variant = variantMap[normalizedStatus] || 'secondary';
+  const label = labelMap[normalizedStatus] || status;
+
   return (
-    <Badge tone={config.tone} className={className}>
-      <span className="h-1.5 w-1.5 rounded-full bg-current" aria-hidden="true" />
-      {config.label}
+    <Badge variant={variant} className={className}>
+      {label}
     </Badge>
   );
-}
+};

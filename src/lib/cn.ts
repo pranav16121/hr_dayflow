@@ -16,3 +16,4 @@ export function cn(...inputs: ClassValue[]): string {
   flatten(inputs, out);
   return out.join(" ");
 }
+

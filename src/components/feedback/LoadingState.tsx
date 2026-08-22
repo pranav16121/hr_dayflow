@@ -1,19 +1,23 @@
-import { Loader2 } from "lucide-react";
-import { cn } from "@/lib/cn";
+import React from 'react';
+import { Loader2 } from 'lucide-react';
 
-interface LoadingStateProps {
+export interface LoadingStateProps {
   label?: string;
+  message?: string;
   className?: string;
 }
 
-export function LoadingState({ label = "Loading…", className }: LoadingStateProps) {
+export const LoadingState: React.FC<LoadingStateProps> = ({
+  label,
+  message,
+  className = '',
+}) => {
+  const text = label || message || 'Loading data...';
+
   return (
-    <div
-      role="status"
-      className={cn("flex flex-col items-center justify-center gap-3 py-16 text-text-muted", className)}
-    >
-      <Loader2 className="h-6 w-6 animate-spin text-primary" aria-hidden="true" />
-      <p className="text-sm">{label}</p>
+    <div className={`flex flex-col items-center justify-center p-8 text-center min-h-[200px] gap-3 ${className}`}>
+      <Loader2 className="h-8 w-8 animate-spin text-primary-500" aria-hidden="true" />
+      <span className="text-sm font-medium text-text-secondary">{text}</span>
     </div>
   );
-}
+};
