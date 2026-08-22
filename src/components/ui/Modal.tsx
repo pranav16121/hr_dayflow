@@ -3,7 +3,8 @@ import { X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 export interface ModalProps {
-  isOpen: boolean;
+  isOpen?: boolean;
+  open?: boolean;
   onClose: () => void;
   title: string;
   description?: string;
@@ -14,6 +15,7 @@ export interface ModalProps {
 
 export const Modal: React.FC<ModalProps> = ({
   isOpen,
+  open,
   onClose,
   title,
   description,
@@ -21,6 +23,8 @@ export const Modal: React.FC<ModalProps> = ({
   footer,
   size = 'md',
 }) => {
+  const showModal = isOpen ?? open ?? false;
+
   // Listen for the Escape key to close the modal
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
@@ -29,7 +33,7 @@ export const Modal: React.FC<ModalProps> = ({
       }
     };
 
-    if (isOpen) {
+    if (showModal) {
       document.body.style.overflow = 'hidden';
       window.addEventListener('keydown', handleEscape);
     }
@@ -38,7 +42,7 @@ export const Modal: React.FC<ModalProps> = ({
       document.body.style.overflow = '';
       window.removeEventListener('keydown', handleEscape);
     };
-  }, [isOpen, onClose]);
+  }, [showModal, onClose]);
 
   const sizes = {
     sm: 'max-w-md',
@@ -49,7 +53,7 @@ export const Modal: React.FC<ModalProps> = ({
 
   return (
     <AnimatePresence>
-      {isOpen && (
+      {showModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           {/* Backdrop Overlay */}
           <motion.div

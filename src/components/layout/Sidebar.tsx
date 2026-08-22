@@ -1,6 +1,7 @@
 import React from 'react';
-import { NavLink, useNavigate } from 'react-router-dom';
+import { NavLink } from 'react-router-dom';
 import { LogOut } from 'lucide-react';
+import { useAuth } from '@/hooks/useAuth';
 
 export interface SidebarLink {
   to: string;
@@ -21,7 +22,12 @@ export const Sidebar: React.FC<SidebarProps> = ({
   onClose,
   portalName,
 }) => {
-  const navigate = useNavigate();
+  const { signOut } = useAuth();
+
+  const handleSignOut = async () => {
+    onClose();
+    await signOut();
+  };
 
   return (
     <>
@@ -79,10 +85,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
         {/* Bottom: Sign Out Action */}
         <div className="p-4 border-t border-zinc-800 select-none">
           <button
-            onClick={() => {
-              onClose();
-              navigate('/login');
-            }}
+            onClick={handleSignOut}
             className="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-button text-sm font-medium text-zinc-400 hover:bg-[#1F2937] hover:text-white transition-colors border border-transparent cursor-pointer"
           >
             <LogOut className="h-4.5 w-4.5 text-current" />

@@ -1,7 +1,6 @@
 import {
   createContext,
   useCallback,
-  useContext,
   useEffect,
   useMemo,
   useState,
@@ -11,7 +10,7 @@ import type { Session, User } from "@supabase/supabase-js";
 import { supabase } from "@/lib/supabaseClient";
 import type { Employee, Profile } from "@/types";
 
-interface AuthContextValue {
+export interface AuthContextValue {
   user: User | null;
   session: Session | null;
   profile: Profile | null;
@@ -24,7 +23,7 @@ interface AuthContextValue {
   refreshProfile: () => Promise<void>;
 }
 
-const AuthContext = createContext<AuthContextValue | undefined>(undefined);
+export const AuthContext = createContext<AuthContextValue | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
@@ -156,7 +155,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (user?.id) {
       await fetchUserData(user.id);
     }
-  }, [user?.id, fetchUserData]);
+  }, [user, fetchUserData]);
 
   const isAdmin = useMemo(() => profile?.role === "admin", [profile?.role]);
 
@@ -178,12 +177,3 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
-
-export function useAuth(): AuthContextValue {
-  const context = useContext(AuthContext);
-  if (!context) {
-    throw new Error("useAuth must be used within an AuthProvider");
-  }
-  return context;
-}
-

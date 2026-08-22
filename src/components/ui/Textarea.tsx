@@ -21,7 +21,8 @@ export const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
     },
     ref
   ) => {
-    const textareaId = id || `textarea-${Math.random().toString(36).substr(2, 9)}`;
+    const generatedId = React.useId();
+    const textareaId = id || generatedId;
 
     const borderClass = error
       ? 'border-danger-500 focus:ring-danger-500/15 focus:border-danger-500'

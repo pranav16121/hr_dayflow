@@ -7,9 +7,10 @@ export interface SelectOption {
 
 export interface SelectProps extends React.SelectHTMLAttributes<HTMLSelectElement> {
   label?: string;
-  options: SelectOption[];
+  options?: SelectOption[];
   error?: string;
   helperText?: string;
+  placeholder?: string;
 }
 
 export const Select = React.forwardRef<HTMLSelectElement, SelectProps>(
@@ -17,17 +18,20 @@ export const Select = React.forwardRef<HTMLSelectElement, SelectProps>(
     {
       className = '',
       label,
-      options,
+      options = [],
       error,
       helperText,
+      placeholder,
       required,
       id,
       disabled,
+      children,
       ...props
     },
     ref
   ) => {
-    const selectId = id || `select-${Math.random().toString(36).substr(2, 9)}`;
+    const generatedId = React.useId();
+    const selectId = id || generatedId;
 
     const borderClass = error
       ? 'border-danger-500 focus:ring-danger-500/15 focus:border-danger-500'
@@ -54,11 +58,15 @@ export const Select = React.forwardRef<HTMLSelectElement, SelectProps>(
             className={`w-full bg-surface border rounded-input shadow-subtle text-sm py-2.5 px-3.5 pr-10 text-text-primary placeholder:text-text-muted transition-all duration-200 focus:outline-none focus:ring-4 focus:ring-offset-0 disabled:cursor-not-allowed appearance-none cursor-pointer ${borderClass}`}
             {...props}
           >
+            {placeholder && (
+              <option value="">{placeholder}</option>
+            )}
             {options.map((option) => (
               <option key={option.value} value={option.value}>
                 {option.label}
               </option>
             ))}
+            {children}
           </select>
           <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3.5 text-text-secondary select-none">
             <svg
