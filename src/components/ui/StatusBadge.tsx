@@ -1,7 +1,6 @@
 import React from 'react';
 import { Badge } from './Badge';
 
-// Explicit type for allowed Dayflow statuses
 export type DayflowStatus = 
   | 'present'
   | 'absent'
@@ -9,7 +8,13 @@ export type DayflowStatus =
   | 'leave'
   | 'pending'
   | 'approved'
-  | 'rejected';
+  | 'rejected'
+  | 'active'
+  | 'inactive'
+  | 'paid'
+  | 'unpaid'
+  | 'sick'
+  | string;
 
 export interface StatusBadgeProps {
   status: DayflowStatus;
@@ -18,34 +23,44 @@ export interface StatusBadgeProps {
 
 export const StatusBadge: React.FC<StatusBadgeProps> = ({ status, className = '' }) => {
   // Mapping statuses to Badge variants
-  const variantMap: Record<DayflowStatus, 'success' | 'danger' | 'warning' | 'info'> = {
+  const variantMap: Record<string, 'success' | 'danger' | 'warning' | 'info' | 'secondary'> = {
     present: 'success',
-    absent: 'danger',
-    half_day: 'warning',
-    leave: 'info',
-    pending: 'warning',
+    active: 'success',
     approved: 'success',
+    paid: 'success',
+    absent: 'danger',
     rejected: 'danger',
+    inactive: 'secondary',
+    half_day: 'warning',
+    pending: 'warning',
+    leave: 'info',
+    unpaid: 'warning',
+    sick: 'danger',
   };
 
   // Human-readable labels mapping
-  const labelMap: Record<DayflowStatus, string> = {
+  const labelMap: Record<string, string> = {
     present: 'Present',
+    active: 'Active',
+    inactive: 'Inactive',
     absent: 'Absent',
     half_day: 'Half Day',
     leave: 'On Leave',
     pending: 'Pending',
     approved: 'Approved',
     rejected: 'Rejected',
+    paid: 'Paid Leave',
+    unpaid: 'Unpaid Leave',
+    sick: 'Sick Leave',
   };
 
-  const variant = variantMap[status] || 'secondary';
-  const label = labelMap[status] || status;
+  const normalizedStatus = typeof status === 'string' ? status.toLowerCase() : '';
+  const variant = variantMap[normalizedStatus] || 'secondary';
+  const label = labelMap[normalizedStatus] || status;
 
   return (
-    <Badge variant={variant} className={`${className}`}>
+    <Badge variant={variant} className={className}>
       {label}
     </Badge>
   );
 };
-

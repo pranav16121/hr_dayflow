@@ -3,12 +3,15 @@ import { Avatar } from "@/components/ui/Avatar";
 import { Button } from "@/components/ui/Button";
 import { useAuth } from "@/hooks/useAuth";
 
-interface NavbarProps {
-  onOpenMobile: () => void;
+export interface NavbarProps {
+  onOpenMobile?: () => void;
+  onMenuToggle?: () => void;
+  portalName?: string;
 }
 
-export function Navbar({ onOpenMobile }: NavbarProps) {
+export function Navbar({ onOpenMobile, onMenuToggle, portalName = "HR / Admin Portal" }: NavbarProps) {
   const { user, profile, employee, signOut } = useAuth();
+  const toggleHandler = onMenuToggle || onOpenMobile;
 
   const displayName = employee?.full_name || profile?.email || user?.email || "Admin User";
   const displayRole = profile?.role === "admin" ? "Administrator" : "Employee";
@@ -19,13 +22,13 @@ export function Navbar({ onOpenMobile }: NavbarProps) {
       <div className="flex items-center gap-3">
         <button
           type="button"
-          onClick={onOpenMobile}
+          onClick={toggleHandler}
           aria-label="Open navigation"
           className="rounded-button p-2 text-text-secondary hover:bg-zinc-100 md:hidden"
         >
           <Menu className="h-5 w-5" />
         </button>
-        <h1 className="hidden text-lg font-semibold text-text-primary md:block">HR / Admin Portal</h1>
+        <h1 className="hidden text-lg font-semibold text-text-primary md:block">{portalName}</h1>
       </div>
 
       <div className="flex items-center gap-4">
