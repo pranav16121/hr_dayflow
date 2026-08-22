@@ -101,3 +101,4 @@ export function PayrollEditModal({ record, onClose, onSubmit }: PayrollEditModal
     </Modal>
   );
 }
+

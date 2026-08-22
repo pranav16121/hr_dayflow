@@ -72,3 +72,4 @@ export function LeaveFilters({ employees, values, onChange }: LeaveFiltersProps)
     </div>
   );
 }
+

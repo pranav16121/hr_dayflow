@@ -50,3 +50,4 @@ export function LeaveTable({ requests, onReview }: LeaveTableProps) {
     </Table>
   );
 }
+
