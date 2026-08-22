@@ -1,7 +1,14 @@
 import type { Employee } from "./employee";
 
-export type LeaveType = "paid" | "sick" | "unpaid";
-export type LeaveStatus = "pending" | "approved" | "rejected";
+export type LeaveType =
+  | "paid"
+  | "sick"
+  | "unpaid";
+
+export type LeaveStatus =
+  | "pending"
+  | "approved"
+  | "rejected";
 
 export interface LeaveRequest {
   id: string;
